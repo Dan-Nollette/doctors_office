@@ -1,23 +1,41 @@
 #!/usr/bin/ruby
-
+require 'pg'
+require('sinatra')
+require('sinatra/reloader')
+also_reload('lib/**/*.rb')
+require('./lib/patient')
+require('./lib/doctor')
+require('./lib/specialty')
 require 'pg'
 
-begin
+DB = PG.connect({:dbname => 'doctors_office'})
 
-con = PG.connect :dbname => 'doctors_office'
+get('/') do
+  erb(:index)
+end
 
+get('/doctor') do
+  @patients = Patient.all
+  @doctors = Doctor.all
+  @Specialties = Specialty.all
+  erb(:doctor)
+end
+get('/patient') do
+  @patients = Patient.all
+  @doctors = Doctor.all
+  @Specialties = Specialty.all
+  erb(:patient)
+end
+get('/admin') do
+  @patients = Patient.all
+  @doctors = Doctor.all
+  @Specialties = Specialty.all
+  erb(:admin)
+end
 
-
-# rs = con.exec "SELECT * FROM doctors_office WHERE Id=0"
-#
-# puts "There are %d columns " %rs.nfields
-#
-# rescue PG::Error => e
-#
-#   e.message
-#
-# ensure
-#   rs.clear if rs
-#   con.close if con
-#
-# end
+post('/patient/') do
+  @name = params["patient_name"]
+  @patient = Patient.find(@name)
+  @doctor = @patient.find_doc
+  erb(:patient_specifics)
+end
